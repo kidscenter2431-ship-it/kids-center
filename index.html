@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kids Center</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<style>
+:root{ --accent: #C9B194; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%;font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+body{
+  background:linear-gradient(180deg,#f6f4f1 0%, #ffffff 100%);
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* شاشة البداية */
+#splashScreen {
+  position: fixed;top:0;left:0;width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#f6f4f1 0%, #ffffff 100%);
+  font-size:2.5rem;font-weight:bold;color: var(--accent);
+  z-index:2000;animation: fadeOut 1s ease forwards;animation-delay: 2.5s;
+}
+@keyframes fadeOut { to { opacity:0; visibility:hidden; } }
+
+/* المربع الرئيسي */
+.square{
+  width:260px;height:260px;border-radius:20px;
+  background:var(--accent);
+  box-shadow:0 6px 20px rgba(0,0,0,0.08);
+  border:8px solid rgba(0,0,0,0.06);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;font-weight:bold;
+  color: white;text-shadow: 0 0 5px rgba(0,0,0,0.3);
+  opacity:0;transform:scale(0.8);transition:all 0.6s ease;
+}
+.square.show {opacity:1;transform:scale(1);}
+.square:hover {transform:scale(1.05);}
+
+/* حاوية المستويات */
+.outer-scroll {
+  position: fixed;
+  top:0;left:0;width:100%;height:100%;
+  overflow-y: auto;
+  display: none;
+  padding-top: 40px;
+  padding-bottom: 60px;
+}
+
+.inner-container{
+  display:flex;flex-direction:column;gap:20px;
+  align-items:center;justify-content:flex-start;
+  width:90%;max-width:600px;margin:auto;
+  padding-bottom: 2rem;
+}
+.inner-box{
+  width:100%;height:80px;border-radius:12px;
+  background:var(--accent);
+  border:4px solid rgba(0,0,0,0.06);
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  display:flex;align-items:center;justify-content:center;
+  color:white;font-weight:bold;font-size:1.25rem;
+  cursor:pointer;opacity:0;transform:translateY(30px);
+  animation:slideUp 0.5s forwards;
+}
+@keyframes slideUp{
+  from{opacity:0; transform:translateY(30px)}
+  to{opacity:1; transform:translateY(0)}
+}
+
+/* شكل القفل */
+.locked {
+  background: #C9B194;
+  cursor: not-allowed;
+  position: relative;
+}
+.locked::after {
+  content: "\f023"; /* أيقونة القفل */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  position: absolute;
+  right: 20px;
+  font-size: 1.5rem;
+  color: white;
+}
+
+/* نافذة كلمة المرور */
+.password-modal {
+  position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);
+  background: var(--accent);
+  border: 6px solid rgba(0,0,0,0.06);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  border-radius: 20px;padding: 2rem;width: 320px;max-width: 90vw;
+  color: white;font-weight: bold;text-align: center;z-index: 1000;user-select: none;
+}
+.password-modal input[type="password"] {
+  width: 100%;padding: 0.5rem 0.75rem;border-radius: 8px;
+  border: none;font-size: 1.5rem;margin-top: 1rem;outline: none;
+}
+.password-modal button {
+  margin-top: 1.5rem;background:white;border: none;
+  border-radius: 8px;padding: 0.75rem;font-weight: bold;font-size: 1rem;
+  color:#C9B194;cursor: pointer;transition: background 0.3s ease;
+  user-select: none;width: 100%;
+}
+.password-modal .error-message {
+  margin-top: 1rem;color: #ff6b6b;font-weight: 600;
+  font-size: 0.9rem;min-height: 1.2rem;
+}
+.overlay {
+  position: fixed;top:0;left:0;width: 100vw;height: 100vh;
+  background: rgba(0,0,0,0.5);z-index: 900;
+}
+</style>
+</head>
+<body>
+
+<div id="splashScreen">Kids Center</div>
+
+<!-- أول مربع -->
+
+<!-- المستويات -->
+<div class="outer-scroll" id="scrollContainer">
+  <div class="inner-container" id="levelsContainer">
+    <div class="inner-box" data-level="Level 1">Level 1</div>
+    <div class="inner-box" data-level="Level 2">Level 2</div>
+    <div class="inner-box" data-level="Level 3">Level 3</div>
+    <div class="inner-box" data-level="Level 4">Level 4</div>
+    <div class="inner-box" data-level="Level 5">Level 5</div>
+    <div class="inner-box locked" data-level="Level 6">Level 6</div>
+    <div class="inner-box locked" data-level="Level 7">Level 7</div>
+    <div class="inner-box locked" data-level="Level 8">Level 8</div>
+  </div>
+</div>
+
+<!-- نافذة كلمة المرور -->
+<div id="overlay" class="overlay" style="display:none;"></div>
+<div id="passwordModal" class="password-modal" style="display:none;">
+  <input type="password" id="passwordInput" placeholder="" autocomplete="off" />
+  <button id="submitPassword">Enter</button>
+  <div class="error-message" id="errorMessage"></div>
+</div>
+
+<script>
+const scrollContainer=document.getElementById('scrollContainer');
+const levelsContainer=document.getElementById('levelsContainer');
+const overlay=document.getElementById('overlay');
+const passwordModal=document.getElementById('passwordModal');
+const passwordInput=document.getElementById('passwordInput');
+const submitPassword=document.getElementById('submitPassword');
+const errorMessage=document.getElementById('errorMessage');
+
+const passwordData={
+  "Level 1": { password: "1234", link: "https://kidscenter2431-ship-it.github.io/level-1/" },
+  "Level 2": { password: "2345", link: "https://kidscenter2431-ship-it.github.io/level-2/" },
+  "Level 3": { password: "3456", link: "https://kidscenter2431-ship-it.github.io/level-3/" },
+  "Level 4": { password: "4567", link: "https://kidscenter2431-ship-it.github.io/level-4/" },
+  "Level 5": { password: "5678", link: "https://kidscenter2431-ship-it.github.io/level-5/" }
+};
+
+let currentLevel=null;
+
+// شاشة البداية
+// شاشة البداية
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    document.getElementById("splashScreen").style.display = "none";
+    scrollContainer.style.display = 'block';
+    document.body.style.overflow = "auto";
+  }, 3000);
+});
+
+
+// إظهار المستويات
+
+
+// فتح نافذة كلمة السر
+document.querySelectorAll('.inner-box').forEach(box=>{
+  box.addEventListener('click',()=>{
+    // لو المستوى عليه قفل
+    if (box.classList.contains('locked')) {
+      alert("المستوى مقفول 🔒");
+      return;
+    }
+    currentLevel = box.dataset.level;
+    openPasswordModal();
+  });
+});
+
+function openPasswordModal(){
+  passwordInput.value = "";
+  errorMessage.textContent = "";
+  passwordModal.style.display = "block";
+  overlay.style.display = "block";
+  passwordInput.focus();
+}
+function closePasswordModal(){
+  passwordModal.style.display = "none";
+  overlay.style.display = "none";
+  passwordInput.value = "";
+  errorMessage.textContent = "";
+}
+
+submitPassword.addEventListener('click', () => {
+  const enteredPassword = passwordInput.value.trim();
+  if (!enteredPassword) {
+    errorMessage.textContent = "يجب إدخال كلمة السر";
+    return;
+  }
+  const data = passwordData[currentLevel];
+  if (!data) {
+    errorMessage.textContent = "هذا المستوى غير متاح بعد 🔒";
+    return;
+  }
+  if (enteredPassword === data.password) {
+    closePasswordModal();
+    window.open(data.link, "_blank");
+  } else {
+    errorMessage.textContent = "كلمة السر غير صحيحة";
+  }
+});
+passwordInput.addEventListener('keydown', (e) => {
+  if (e.key === "Enter") submitPassword.click();
+});
+overlay.addEventListener('click', closePasswordModal);
+</script>
+
+</body>
+</html>
